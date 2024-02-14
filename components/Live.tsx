@@ -7,8 +7,12 @@ import ReactionSelector from "./Reaction/ReactionButton";
 import FlyingReaction from "./Reaction/FlyingReaction";
 import useInterval from "@/hooks/useInterval";
 
+type Props = {
+    canvasRef: React.MutableRefObject<HTMLCanvasElement |
+        null>
+}
 
-const Live = () => {
+const Live = ({ canvasRef }: Props) => {
     const others = useOthers()
     const [{ cursor }, updateMyPresence] = useMyPresence() as any;
 
@@ -20,40 +24,40 @@ const Live = () => {
 
     const broadcast = useBroadcastEvent();
 
-    useInterval(()=>{
-        setReaction((reaction)=>reaction.filter((r)=>r.
-        timestamp> Date.now()-4000))
-    },1000)
+    useInterval(() => {
+        setReaction((reaction) => reaction.filter((r) => r.
+            timestamp > Date.now() - 4000))
+    }, 1000)
 
-    useInterval(()=>{
-        if(cursorState.mode === CursorMode.Reaction &&
-            cursorState.isPressed && cursor){
-                setReaction((reactions)=>reaction.concat([
-                   {
-                    point: {x: cursor.x, y:cursor.y},
+    useInterval(() => {
+        if (cursorState.mode === CursorMode.Reaction &&
+            cursorState.isPressed && cursor) {
+            setReaction((reactions) => reaction.concat([
+                {
+                    point: { x: cursor.x, y: cursor.y },
                     value: cursorState.reaction,
                     timestamp: Date.now()
-                   } 
-                ]))
-                broadcast({
-                    x:cursor.x,
-                    y: cursor.y,
-                    value: cursorState.reaction
-                })
+                }
+            ]))
+            broadcast({
+                x: cursor.x,
+                y: cursor.y,
+                value: cursorState.reaction
+            })
 
-            }
-    },100)
+        }
+    }, 100)
 
-    useEventListener((eventData)=>{
-        const event= eventData.event as ReactionEvent
+    useEventListener((eventData) => {
+        const event = eventData.event as ReactionEvent
 
-        setReaction((reactions)=>reaction.concat([
+        setReaction((reactions) => reaction.concat([
             {
-             point: {x: event.x, y:event.y},
-             value: event.value,
-             timestamp: Date.now()
-            } 
-         ]))
+                point: { x: event.x, y: event.y },
+                value: event.value,
+                timestamp: Date.now()
+            }
+        ]))
     })
 
     const handlePointerMove = useCallback((event: React.PointerEvent) => {
@@ -141,17 +145,18 @@ const Live = () => {
         })
     }, [])
 
-  
+
 
     return (
         <div
+            id="canvas"
             onPointerMove={handlePointerMove}
             onPointerLeave={handlePointerLeave}
             onPointerDown={handlePointerDown}
             onPointerUp={handlePointerUp}
             className="h-[100vh] w-full flex justify-center items-center text-center"
         >
-            <h1 className="text-5xl text-white">LiveBlocks figma clone</h1>
+            <canvas ref={canvasRef} />
 
             {reaction.map((r) => (
                 <FlyingReaction
